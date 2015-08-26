@@ -12,6 +12,8 @@ AGP - calculate agp values given some glucose text
 # Inherit from openaps.uses.use.Use class
 from openaps.uses.use import Use
 
+import json
+
 from agp import AGP
 class calculate (Use):
   """ Calculate agp
@@ -23,15 +25,16 @@ class calculate (Use):
     Create a dict data type from args namespace so that config serializer can
     save these args for report generation.
     """
-    return dict(input=args.input)
+    return dict(input=args.input, json=args.json)
 
   # configure_app allows your plugin to specify command line parameters
   def configure_app (self, app, parser):
     """
     Set up any arguments needed by this use.
     """
-    # get file based argument called input.
-    parser.add_argument('input', default='glucose.txt')
+    # get file based argument called input
+    parser.add_argument('input', default='clean_all_glucose.json')
+    parser.add_argument('--json', action='store_true', default=False)
 
   def prerender_text (self, data):
     out = [ ]
@@ -50,10 +53,11 @@ class calculate (Use):
     params = self.get_params(args)
     # print params.get('input')
     # create calculator
-    parser = AGP( )
+    parser = AGP(json=params.get('json', False))
     with open(params.get('input'), 'r') as f:
       # calculate agp for all input
-      return parser(f.readlines())
+      # return parser(f.readlines())
+      return parser(json.load(f))
 
 # set_config is needed by openaps for all vendors.
 # set_config is used by `device add` commands so save any needed
